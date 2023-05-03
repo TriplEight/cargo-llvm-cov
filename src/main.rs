@@ -105,6 +105,12 @@ fn try_main() -> Result<()> {
                 generate_report(cx)?;
             }
         }
+        Subcommand::NextestArchive => {
+            let cx = &Context::new(args)?;
+            clean::clean_partial(cx)?;
+            create_dirs(cx)?;
+            archive_nextest(cx)?;
+        }
         Subcommand::None | Subcommand::Test => {
             let cx = &Context::new(args)?;
             clean::clean_partial(cx)?;
@@ -356,6 +362,23 @@ fn run_test(cx: &Context) -> Result<()> {
         stdout_to_stderr(cx, &mut cargo);
         cargo.run()?;
     }
+
+    Ok(())
+}
+
+fn archive_nextest(cx: &Context) -> Result<()> {
+    let mut cargo = cx.cargo();
+
+    set_env(cx, &mut cargo, IsNextest(true))?;
+
+    cargo.arg("nextest").arg("archive");
+
+    cargo::test_or_run_args(cx, &mut cargo);
+    if term::verbose() {
+        status!("Running", "{cargo}");
+    }
+    stdout_to_stderr(cx, &mut cargo);
+    cargo.run()?;
 
     Ok(())
 }
