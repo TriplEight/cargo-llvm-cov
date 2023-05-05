@@ -1,4 +1,4 @@
-use std::ffi::OsStr;
+use std::{ffi::OsStr, env::current_dir};
 
 use anyhow::{bail, format_err, Context as _, Result};
 use camino::{Utf8Path, Utf8PathBuf};
@@ -242,14 +242,16 @@ pub(crate) fn clean_args(cx: &Context, cmd: &mut ProcessBuilder) {
     }
 }
 
+// TODO: Remove this workaround when --archive-file and --extract-to are passed to nextest subcommand.
 // https://github.com/taiki-e/cargo-llvm-cov/issues/265
 fn add_target_dir(args: &Args, cmd: &mut ProcessBuilder, target_dir: &Utf8Path) {
     if args.subcommand == Subcommand::Nextest
         && args.cargo_args.contains(&"--archive-file".to_string())
     {
         cmd.arg("--extract-to");
+        cmd.arg(current_dir().unwrap().join("target/nextest-artifacts"));
     } else {
         cmd.arg("--target-dir");
+        cmd.arg(target_dir.as_str());
     }
-    cmd.arg(target_dir.as_str());
 }
