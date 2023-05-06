@@ -248,8 +248,7 @@ fn add_target_dir(args: &Args, cmd: &mut ProcessBuilder, target_dir: &Utf8Path) 
     if args.subcommand == Subcommand::Nextest
         && args.cargo_args.contains(&"--archive-file".to_string())
     {
-        cmd.arg("--extract-to");
-        cmd.arg(current_dir().unwrap().join("target/nextest-artifacts"));
+        ()
     } else {
         cmd.arg("--target-dir");
         cmd.arg(target_dir.as_str());
