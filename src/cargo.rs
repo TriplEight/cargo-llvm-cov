@@ -198,7 +198,11 @@ pub(crate) fn test_or_run_args(cx: &Context, cmd: &mut ProcessBuilder) {
     cmd.arg("--manifest-path");
     cmd.arg(&cx.ws.current_manifest);
 
-    add_target_dir(&cx.args, cmd, &cx.ws.target_dir);
+    // Only add '--target-dir' if the subcommand is not 'nextest' or '--archive-file' is not present
+    if cx.args.subcommand != Subcommand::Nextest || !cx.args.cargo_args.iter().any(|arg| arg == "--archive-file") {
+        cmd.arg("--target-dir");
+        cmd.arg(&cx.ws.target_dir);
+    }
 
     for cargo_arg in &cx.args.cargo_args {
         cmd.arg(cargo_arg);
@@ -239,18 +243,5 @@ pub(crate) fn clean_args(cx: &Context, cmd: &mut ProcessBuilder) {
     // If `-vv` is passed, propagate `-v` to cargo.
     if cx.args.verbose > 1 {
         cmd.arg(format!("-{}", "v".repeat(cx.args.verbose as usize - 1)));
-    }
-}
-
-// TODO: Remove this workaround when --archive-file and --extract-to are passed to nextest subcommand.
-// https://github.com/taiki-e/cargo-llvm-cov/issues/265
-fn add_target_dir(args: &Args, cmd: &mut ProcessBuilder, target_dir: &Utf8Path) {
-    if args.subcommand == Subcommand::Nextest
-        && args.cargo_args.contains(&"--archive-file".to_string())
-    {
-        ()
-    } else {
-        cmd.arg("--target-dir");
-        cmd.arg(target_dir.as_str());
     }
 }
