@@ -5,7 +5,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use cargo_config2::Config;
 
 use crate::{
-    cli::{Args, ManifestOptions, Subcommand},
+    cli::{ManifestOptions, Subcommand},
     context::Context,
     env,
     process::ProcessBuilder,
