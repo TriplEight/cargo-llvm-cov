@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, env::current_dir};
+use std::ffi::OsStr;
 
 use anyhow::{bail, format_err, Context as _, Result};
 use camino::{Utf8Path, Utf8PathBuf};

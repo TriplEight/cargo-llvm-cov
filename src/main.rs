@@ -20,7 +20,7 @@ use std::{
     ffi::{OsStr, OsString},
     io::{self, BufRead, Write},
     path::Path,
-    time::SystemTime, env::current_dir,
+    time::SystemTime,
 };
 
 use anyhow::{bail, Context as _, Result};
