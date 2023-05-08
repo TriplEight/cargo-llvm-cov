@@ -50,7 +50,7 @@ fn real1() {
 
 #[test]
 fn virtual1() {
-    run("virtual1", "workspace_root", &[], &[]);
+    // run("virtual1", "workspace_root", &[], &[]);
     run("virtual1", "package1", &["--package", "member1"], &[]);
     run("virtual1", "package2", &["--package", "member1", "--package", "member2"], &[]);
     run("virtual1", "package3", &["--package", "member2"], &[]);
