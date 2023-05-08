@@ -105,6 +105,12 @@ fn try_main() -> Result<()> {
                 generate_report(cx)?;
             }
         }
+        Subcommand::NextestArchive => {
+            let cx = &Context::new(args)?;
+            clean::clean_partial(cx)?;
+            create_dirs(cx)?;
+            archive_nextest(cx)?;
+        }
         Subcommand::None | Subcommand::Test => {
             let cx = &Context::new(args)?;
             clean::clean_partial(cx)?;
@@ -356,6 +362,26 @@ fn run_test(cx: &Context) -> Result<()> {
         stdout_to_stderr(cx, &mut cargo);
         cargo.run()?;
     }
+
+    Ok(())
+}
+
+// TODO: throw an error instead
+// "Please run nextest archive without llvm-cov, it's supposed to generate test artifacts without running tests.
+// Tests are required to generate coverage data. Generate the nextest archive first, then run `cargo llvm-cov nextest --archive-file <path>`."
+fn archive_nextest(cx: &Context) -> Result<()> {
+    let mut cargo = cx.cargo();
+
+    set_env(cx, &mut cargo, IsNextest(true))?;
+
+    cargo.arg("nextest").arg("archive");
+
+    cargo::test_or_run_args(cx, &mut cargo);
+    if term::verbose() {
+        status!("Running", "{cargo}");
+    }
+    stdout_to_stderr(cx, &mut cargo);
+    cargo.run()?;
 
     Ok(())
 }
@@ -625,6 +651,13 @@ fn object_files(cx: &Context) -> Result<Vec<OsString>> {
     // This is not the ideal way, but the way unstable book says it is cannot support them.
     // https://doc.rust-lang.org/nightly/rustc/instrument-coverage.html#tips-for-listing-the-binaries-automatically
     let mut target_dir = cx.ws.target_dir.clone();
+    // TODO: just passthrough --archive-file to nextest subcommand alongside with --extract-to
+    // if cx.args.subcommand == Subcommand::Nextest
+    //     && cx.args.cargo_args.iter().any(|a| a == "--archive-file")
+    // {
+    //     // target_dir.push("target");
+    //     current_dir().unwrap().push("target/nextest-artifacts");
+    // }
     // https://doc.rust-lang.org/nightly/cargo/guide/build-cache.html
     if let Some(target) = &cx.args.target {
         target_dir.push(target);

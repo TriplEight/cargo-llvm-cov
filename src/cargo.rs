@@ -198,8 +198,11 @@ pub(crate) fn test_or_run_args(cx: &Context, cmd: &mut ProcessBuilder) {
     cmd.arg("--manifest-path");
     cmd.arg(&cx.ws.current_manifest);
 
-    cmd.arg("--target-dir");
-    cmd.arg(&cx.ws.target_dir);
+    // Only add '--target-dir' if the subcommand is not 'nextest' or '--archive-file' is not present
+    if cx.args.subcommand != Subcommand::Nextest || !cx.args.cargo_args.iter().any(|arg| arg == "--archive-file") {
+        cmd.arg("--target-dir");
+        cmd.arg(&cx.ws.target_dir);
+    }
 
     for cargo_arg in &cx.args.cargo_args {
         cmd.arg(cargo_arg);
@@ -233,7 +236,7 @@ pub(crate) fn clean_args(cx: &Context, cmd: &mut ProcessBuilder) {
     cmd.arg(&cx.ws.current_manifest);
 
     cmd.arg("--target-dir");
-    cmd.arg(&cx.ws.target_dir);
+    cmd.arg(cx.ws.target_dir.as_str());
 
     cx.args.manifest.cargo_args(cmd);
 
